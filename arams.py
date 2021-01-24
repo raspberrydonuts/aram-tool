@@ -11,12 +11,13 @@ def process_champion_data():
     return champion_table
 
 def main():
-
+    print("enter summoner name")
+    user = input()
     data = {}
 
     # to run virtual environment: source aram_tool/bin/activate 
     # key = "RGAPI-fcd52462-de11-44de-b8a5-985913607996"
-    get_account_url = "https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/Wrangler%20Jeans?api_key=RGAPI-ab827109-ce88-453a-b23c-e26e89a081b0"
+    get_account_url = f"https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{user}?api_key=RGAPI-ab827109-ce88-453a-b23c-e26e89a081b0"
     get_account_response = requests.get(get_account_url)
     if get_account_response.status_code != 200:
         print("Get account failed. Status code: ", get_account_response.status_code)
@@ -33,7 +34,6 @@ def main():
         # for every game in games played
         for match in get_matches_response.json()['matches']:
             game_id = match['gameId']
-            print(num_games)
             get_game_url = f"https://na1.api.riotgames.com/lol/match/v4/matches/{game_id}?api_key=RGAPI-ab827109-ce88-453a-b23c-e26e89a081b0"
             get_game_response = requests.get(get_game_url).json()
 
@@ -41,6 +41,7 @@ def main():
             if 'gameMode' in get_game_response and get_game_response['gameMode'] == "ARAM":
                 participant_id = 0
                 num_games += 1
+                print(num_games)
                 for participant in get_game_response['participantIdentities']:
                     if account_id == participant['player']['accountId']:
                         participant_id = participant['participantId']
@@ -113,7 +114,7 @@ def main():
 
                             quadra_kills = participant['stats']['quadraKills']
                             champion_details["total_quadra_kills"] += quadra_kills
-                            champion_details["most_quadra_kills"] = max(quadra_kills, champion_details["total_quadra_kills"])
+                            champion_details["most_quadra_kills"] = max(quadra_kills, champion_details["most_quadra_kills"])
 
                             penta_kills = participant['stats']['pentaKills']
                             champion_details["total_penta_kills"] += penta_kills
@@ -128,14 +129,14 @@ def main():
                             champion_details["most_total_minions_killed"] = max(total_minions_killed, champion_details["most_minions_killed"])
                             break
         beginIndex += 100
-        if len(get_matches_response.json()['matches']) < 100:
-            break
+        # if len(get_matches_response.json()['matches']) < 100:
+        #     break
         time.sleep(120)
         get_matches_url = f"https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/{account_id}?beginIndex={beginIndex}&api_key=RGAPI-ab827109-ce88-453a-b23c-e26e89a081b0"
         get_matches_response = requests.get(get_matches_url)
         print(get_matches_response.status_code)
 
-    with open('data.json', 'w', encoding='utf-8') as f:
+    with open('data2.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     
